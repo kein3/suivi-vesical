@@ -8,7 +8,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icon.svg">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=4">
   <title>Suivi vésical</title>
 </head>
 <body>
@@ -48,32 +48,19 @@
 
       <article class="card">
         <div class="card-head"><div><h2>Nouvelle entrée</h2><p>Ajoute une entrée en quelques secondes.</p></div></div>
-        <div class="row">
-          <div><label for="inTime">Heure</label><input type="time" id="inTime"></div>
-          <div><label for="inDrink">Boisson</label><select id="inDrink"><option value="">Aucune</option><option>Eau</option><option>Café</option><option>Thé</option><option>Soda / gazeux</option><option>Alcool</option><option>Énergisante</option><option>Jus / agrumes</option><option>Autre</option></select></div>
-        </div>
-        <div class="row">
-          <div><label for="inAmount">Quantité bue (ml)</label><input id="inAmount" type="number" inputmode="numeric" min="0" max="3000" step="50" placeholder="Ex. 250"></div>
-          <div><label for="inUrgency">Urgence ressentie</label><select id="inUrgency"><option value="">Non précisée</option><option value="1">1 · faible</option><option value="2">2</option><option value="3">3 · modérée</option><option value="4">4</option><option value="5">5 · forte</option></select></div>
-        </div>
+        <div class="row"><div><label for="inTime">Heure</label><input type="time" id="inTime"></div><div><label for="inDrink">Boisson</label><select id="inDrink"><option value="">Aucune</option><option>Eau</option><option>Café</option><option>Thé</option><option>Soda / gazeux</option><option>Alcool</option><option>Énergisante</option><option>Jus / agrumes</option><option>Autre</option></select></div></div>
+        <div class="row"><div><label for="inAmount">Quantité bue (ml)</label><input id="inAmount" type="number" inputmode="numeric" min="0" max="3000" step="50" placeholder="Ex. 250"></div><div><label for="inUrgency">Urgence ressentie</label><select id="inUrgency"><option value="">Non précisée</option><option value="1">1 · faible</option><option value="2">2</option><option value="3">3 · modérée</option><option value="4">4</option><option value="5">5 · forte</option></select></div></div>
         <div class="field"><label>Volume uriné</label><div class="seg" id="segVol"><button data-v="goutte">Faible</button><button data-v="normal" class="sel">Normal</button><button data-v="abondant">Abondant</button></div></div>
         <div class="field"><label>Type d’envie</label><div class="seg" id="segType"><button data-t="vraie" class="sel">Vraie envie</button><button data-t="precaution">Par précaution</button></div></div>
         <div class="field"><label for="inNote">Note facultative</label><input id="inNote" maxlength="160" placeholder="Douleur, urgence, contexte…"></div>
         <button class="btn" id="addBtn">Ajouter l’entrée</button>
       </article>
 
-      <article class="card">
-        <div class="card-head"><div><h2>Aujourd’hui</h2><p id="todayDate"></p></div><button class="text-btn danger-text" id="resetDay">Effacer</button></div>
-        <div id="list"></div>
-      </article>
+      <article class="card"><div class="card-head"><div><h2>Aujourd’hui</h2><p id="todayDate"></p></div><button class="text-btn danger-text" id="resetDay">Effacer</button></div><div id="list"></div></article>
     </section>
 
     <section class="panel" id="historique">
-      <article class="card">
-        <div class="card-head"><div><h2>Calendrier</h2><p>Consulte et modifie n’importe quelle journée.</p></div><button class="text-btn" id="goTodayBtn">Aujourd’hui</button></div>
-        <div class="date-nav"><button class="square-btn" id="prevDayBtn" aria-label="Jour précédent">‹</button><input type="date" id="historyDate"><button class="square-btn" id="nextDayBtn" aria-label="Jour suivant">›</button></div>
-        <div class="day-summary" id="historyDaySummary"></div><div id="historyDayList"></div>
-      </article>
+      <article class="card"><div class="card-head"><div><h2>Calendrier</h2><p>Consulte et modifie n’importe quelle journée.</p></div><button class="text-btn" id="goTodayBtn">Aujourd’hui</button></div><div class="date-nav"><button class="square-btn" id="prevDayBtn" aria-label="Jour précédent">‹</button><input type="date" id="historyDate"><button class="square-btn" id="nextDayBtn" aria-label="Jour suivant">›</button></div><div class="day-summary" id="historyDaySummary"></div><div id="historyDayList"></div></article>
 
       <article class="card">
         <div class="card-head"><div><h2>Tendances</h2><p>Fréquence, délai moyen et précaution.</p></div><select class="compact-select" id="periodSelect"><option value="7">7 jours</option><option value="14" selected>14 jours</option><option value="30">30 jours</option></select></div>
@@ -116,6 +103,6 @@
   <dialog id="editDialog" class="modal"><form method="dialog" id="editForm"><div class="modal-head"><div><h2>Modifier l’entrée</h2><p>Les changements sont enregistrés dans la journée sélectionnée.</p></div><button class="close-btn" value="cancel" aria-label="Fermer">×</button></div><div class="row"><div><label for="editTime">Heure</label><input type="time" id="editTime" required></div><div><label for="editDrink">Boisson</label><select id="editDrink"><option value="">Aucune</option><option>Eau</option><option>Café</option><option>Thé</option><option>Soda / gazeux</option><option>Alcool</option><option>Énergisante</option><option>Jus / agrumes</option><option>Autre</option></select></div></div><div class="row"><div><label for="editAmount">Quantité (ml)</label><input id="editAmount" type="number" min="0" max="3000" step="50"></div><div><label for="editUrgency">Urgence</label><select id="editUrgency"><option value="">Non précisée</option><option value="1">1 · faible</option><option value="2">2</option><option value="3">3 · modérée</option><option value="4">4</option><option value="5">5 · forte</option></select></div></div><div class="field"><label for="editVol">Volume uriné</label><select id="editVol"><option value="goutte">Faible</option><option value="normal">Normal</option><option value="abondant">Abondant</option></select></div><div class="field"><label for="editType">Type d’envie</label><select id="editType"><option value="vraie">Vraie envie</option><option value="precaution">Par précaution</option></select></div><div class="field"><label for="editNote">Note</label><input id="editNote" maxlength="160"></div><div class="button-grid"><button class="btn" id="saveEditBtn" value="default">Enregistrer</button><button class="btn ghost danger-text" id="deleteEditBtn" type="button">Supprimer</button></div></form></dialog>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script type="module" src="app.js"></script>
+  <script type="module" src="app.js?v=4"></script>
 </body>
 </html>
