@@ -1,4 +1,4 @@
-const CACHE='suivi-v6-mobile-fix-20260716b';
+const CACHE='suivi-v7-layout-20260716';
 const FILES=['./','./index.html','./style.css?v=4','./app.js?v=4','./data.js','./tracker.js','./insights.js','./settings.js','./manifest.webmanifest','./icon.svg'];
 
 self.addEventListener('install',event=>{
