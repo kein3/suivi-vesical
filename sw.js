@@ -1,5 +1,5 @@
-const CACHE='suivi-v8-ios-time-20260716';
-const FILES=['./','./index.html','./style.css?v=4','./mobile-fix.css?v=8','./app.js?v=4','./data.js','./tracker.js','./insights.js','./settings.js','./manifest.webmanifest','./icon.svg'];
+const CACHE='suivi-v9-polish-20260716';
+const FILES=['./','./index.html','./style.css?v=4','./mobile-fix.css?v=9','./app.js?v=4','./data.js','./tracker.js','./insights.js','./settings.js','./manifest.webmanifest','./icon.svg'];
 
 self.addEventListener('install',event=>{
   self.skipWaiting();
