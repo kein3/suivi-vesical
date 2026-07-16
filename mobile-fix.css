@@ -1,0 +1,90 @@
+/* Correctifs visuels mobiles — v7 */
+:root{--mobile-nav-h:64px}
+html,body{overflow-x:clip}
+body{padding-bottom:calc(var(--mobile-nav-h) + env(safe-area-inset-bottom,0px) + 28px)}
+.wrap{padding-bottom:92px}
+.panel{scroll-margin-bottom:110px}
+
+/* Espacements plus respirants */
+.card{overflow:hidden}
+.card>*:last-child{margin-bottom:0}
+.card-head{margin-bottom:18px}
+.row{row-gap:18px}
+.row+ .row{margin-top:2px}
+.field{margin-bottom:18px}
+label{margin-bottom:8px}
+input,select,textarea{min-height:47px}
+.seg{margin-top:2px}
+.note{margin-top:14px}
+
+/* Navigation plus compacte et moins intrusive */
+.nav{
+  left:10px;
+  right:10px;
+  bottom:calc(8px + env(safe-area-inset-bottom,0px));
+  height:var(--mobile-nav-h);
+  padding:5px;
+  border-radius:19px;
+  transition:transform .2s ease,opacity .2s ease;
+}
+.nav button{border-radius:14px;padding:3px 1px;font-size:.52rem;gap:1px}
+.nav button>span:first-child{font-size:1rem}
+.nav button.active{box-shadow:inset 0 0 0 1px rgba(8,119,138,.08)}
+body:has(input:focus) .nav,
+body:has(select:focus) .nav,
+body:has(textarea:focus) .nav{transform:translateY(calc(100% + 24px));opacity:0;pointer-events:none}
+
+/* Formulaire : éviter l'effet collé */
+#carnet .card:first-of-type{padding-bottom:22px}
+#carnet .card:first-of-type .row>div{display:flex;flex-direction:column}
+#carnet .card:first-of-type .row>div+div{margin-top:1px}
+#carnet .card:first-of-type .field{padding-top:2px}
+#carnet .card:first-of-type .btn{margin-top:4px}
+
+/* Statistiques et listes */
+.stats{align-items:stretch}
+.stat{min-height:104px}
+.entry{padding-top:14px;padding-bottom:14px}
+.entry-actions{align-self:start}
+
+/* Petits écrans iPhone */
+@media(max-width:600px){
+  .app-header{padding-bottom:24px}
+  .wrap{padding-top:16px;padding-left:12px;padding-right:12px}
+  .card{padding:18px 15px;margin-bottom:16px}
+  .row,.button-grid{grid-template-columns:minmax(0,1fr);gap:18px}
+  .row{margin-bottom:18px}
+  .stats{gap:8px}
+  .stat{min-height:100px;padding:14px 9px 12px}
+  .stat strong{font-size:1.45rem}
+  .stat span{font-size:.61rem;line-height:1.2}
+  .seg{gap:4px;padding:4px}
+  .seg button{min-height:42px;font-size:.74rem;padding:7px 4px}
+  .date-nav{gap:7px}
+  .chart{padding-bottom:8px}
+  .switch-row{gap:16px}
+  .modal form{padding:16px}
+}
+
+@media(max-width:390px){
+  .app-header h1{font-size:1.32rem}
+  .app-header p:not(.eyebrow){font-size:.7rem}
+  .header-actions{gap:5px}
+  .icon-btn{width:38px;height:38px;flex-basis:38px}
+  .stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+  .stat{min-height:96px;padding:13px 7px 11px}
+  .stat strong{font-size:1.32rem}
+  .stat span{font-size:.56rem}
+  .card{border-radius:18px;padding-left:13px;padding-right:13px}
+  .nav{left:6px;right:6px;bottom:calc(6px + env(safe-area-inset-bottom,0px));height:60px}
+  .nav button{font-size:.48rem}
+  .nav button>span:first-child{font-size:.96rem}
+  .insight{grid-template-columns:70px minmax(0,1fr) auto}
+}
+
+@media(max-width:340px){
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .stats .stat:last-child{grid-column:1/-1}
+  .nav button{font-size:0}
+  .nav button>span:first-child{font-size:1.05rem}
+}
