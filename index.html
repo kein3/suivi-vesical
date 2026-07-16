@@ -1,90 +1,31 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1">
-  <meta name="theme-color" content="#1f5f7a">
-  <meta name="description" content="Carnet personnel de suivi vésical, exercices de Kegel et programme sur 4 semaines.">
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="icon.svg">
-  <link rel="stylesheet" href="style.css">
-  <title>Suivi vésical</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
+<meta name="theme-color" content="#1f5f7a">
+<meta name="description" content="Carnet personnel de suivi vésical et exercices de Kegel.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="style.css">
+<title>Suivi vésical</title>
 </head>
 <body>
-<header class="app-header">
-  <div>
-    <p class="eyebrow">Mon programme</p>
-    <h1>Suivi vésical</h1>
-    <p>Carnet, progression et Kegel sur 4 semaines</p>
-  </div>
-  <button class="icon-btn" id="themeBtn" aria-label="Changer de thème" title="Changer de thème">☾</button>
-</header>
-
+<header><div class="header-row"><div><h1>Suivi vésical</h1><p>Carnet, progression et Kegel</p></div><div class="header-actions"><button class="icon-btn" id="themeBtn" aria-label="Mode sombre">☾</button></div></div></header>
 <main class="wrap">
-  <section class="panel active" id="carnet">
-    <div class="stats">
-      <article class="stat"><strong id="stCount">0</strong><span>mictions aujourd’hui</span></article>
-      <article class="stat"><strong id="stGap">–</strong><span>écart moyen</span></article>
-      <article class="stat"><strong id="stPrec">0</strong><span>par précaution</span></article>
-    </div>
-
-    <article class="card">
-      <div class="card-head"><div><h2>Nouvelle entrée</h2><p>Ajoute une entrée en quelques secondes.</p></div></div>
-      <div class="row">
-        <div><label for="inTime">Heure</label><input type="time" id="inTime"></div>
-        <div><label for="inDrink">Boisson</label><select id="inDrink"><option value="">Aucune</option><option>Eau</option><option>Café</option><option>Thé</option><option>Soda / gazeux</option><option>Alcool</option><option>Énergisante</option><option>Jus / agrumes</option><option>Autre</option></select></div>
-      </div>
-      <div class="field"><label>Volume</label><div class="seg" id="segVol"><button data-v="goutte">Faible</button><button data-v="normal" class="sel">Normal</button><button data-v="abondant">Abondant</button></div></div>
-      <div class="field"><label>Type d’envie</label><div class="seg" id="segType"><button data-t="vraie" class="sel">Vraie envie</button><button data-t="precaution">Par précaution</button></div></div>
-      <div class="field"><label for="inNote">Note facultative</label><input id="inNote" maxlength="120" placeholder="Douleur, urgence, contexte…"></div>
-      <button class="btn" id="addBtn">Ajouter l’entrée</button>
-    </article>
-
-    <article class="card">
-      <div class="card-head"><div><h2>Aujourd’hui</h2><p id="todayDate"></p></div><button class="text-btn" id="resetDay">Effacer</button></div>
-      <div id="list"></div>
-    </article>
-  </section>
-
-  <section class="panel" id="historique">
-    <article class="card">
-      <div class="card-head"><div><h2>Historique</h2><p>Les 14 derniers jours enregistrés.</p></div><button class="text-btn" id="exportCsv">Exporter CSV</button></div>
-      <div class="chart" id="historyChart"></div>
-      <div id="historyList"></div>
-    </article>
-    <article class="card">
-      <h2>Sauvegarde</h2><p class="sub">Les données restent dans ce navigateur. Exporte une copie avant de changer de téléphone.</p>
-      <div class="button-grid"><button class="btn secondary" id="backupBtn">Télécharger une sauvegarde</button><label class="btn secondary file-label">Restaurer<input type="file" id="restoreInput" accept="application/json"></label></div>
-    </article>
-  </section>
-
-  <section class="panel" id="kegel">
-    <article class="card">
-      <h2>Séance guidée</h2><p class="sub">Contracte sans bloquer la respiration ni serrer les abdominaux.</p>
-      <div class="field"><label>Programme</label><div class="seg" id="segKphase"><button data-hold="3" data-reps="10" class="sel">Apprentissage · 3 s</button><button data-hold="5" data-reps="10">Renforcement · 5 s</button></div></div>
-      <div class="kegel-timer"><div class="kegel-phase" id="kPhase">Prêt ?</div><div class="ring"><svg width="150" height="150" viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52" fill="none" stroke="var(--line)" stroke-width="9"/><circle id="kRing" cx="60" cy="60" r="52" fill="none" stroke="var(--water)" stroke-width="9" stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="326.7" transform="rotate(-90 60 60)"/></svg></div><div class="kegel-count" id="kCount">Répétition 0 / 10</div></div>
-      <button class="btn" id="kStart">Démarrer la séance</button>
-      <p class="note">Ne pratique pas régulièrement en interrompant le jet urinaire : cela sert seulement à identifier les muscles.</p>
-    </article>
-    <article class="card center"><span class="big-number" id="kToday">0</span><p>série(s) terminée(s) aujourd’hui</p></article>
-  </section>
-
-  <section class="panel" id="plan">
-    <article class="card"><h2>Programme sur 4 semaines</h2><p class="sub">Les cases sont conservées chaque jour.</p><div class="weekhead">Semaines 1–2 · Observer</div><div id="plan12"></div><div class="weekhead">Semaines 3–4 · Rééduquer</div><div id="plan34"></div><div class="weekhead">Habitudes permanentes</div><div id="planPerm"></div></article>
-    <article class="card"><h2>Quand consulter</h2><div class="note warn">Consulte rapidement en cas de sang dans les urines, fièvre, douleur importante, impossibilité d’uriner ou aggravation brutale. Demande un avis médical si les symptômes persistent ou gênent ton quotidien.</div></article>
-  </section>
-
-  <footer>Outil de suivi personnel, pas un dispositif médical. Les données restent sur ton appareil.</footer>
+<section class="panel active" id="carnet">
+<div class="stats"><div class="stat"><div class="num" id="stCount">0</div><div class="lbl">mictions aujourd’hui</div></div><div class="stat"><div class="num" id="stGap">–</div><div class="lbl">écart moyen</div></div><div class="stat"><div class="num" id="stPrec">0</div><div class="lbl">par précaution</div></div></div>
+<article class="card"><h2>Nouvelle entrée</h2><p class="sub">Ajoute les informations utiles en quelques secondes.</p>
+<div class="row"><div class="field"><label for="inTime">Heure</label><input type="time" id="inTime"></div><div class="field"><label for="inDrink">Boisson</label><select id="inDrink"><option value="">Aucune</option><option>Eau</option><option>Café</option><option>Thé</option><option>Soda / gazeux</option><option>Alcool</option><option>Énergisante</option><option>Jus / agrumes</option><option>Autre</option></select></div></div>
+<div class="field"><label for="inAmount">Quantité bue (ml)</label><input type="number" id="inAmount" min="0" step="50" inputmode="numeric" placeholder="Ex. 250"></div>
+<div class="field"><label>Volume uriné</label><div class="seg" id="segVol"><button data-v="goutte">Faible</button><button data-v="normal" class="sel">Normal</button><button data-v="abondant">Abondant</button></div></div>
+<div class="field"><label>Type d’envie</label><div class="seg" id="segType"><button data-t="vraie" class="sel">Vraie envie</button><button data-t="precaution">Par précaution</button></div></div>
+<div class="field"><label for="inNote">Note facultative</label><textarea id="inNote" maxlength="160" placeholder="Urgence, douleur, contexte…"></textarea></div><button class="btn" id="addBtn">Ajouter l’entrée</button></article>
+<article class="card"><h2>Aujourd’hui</h2><p class="sub" id="todayDate"></p><div id="list"></div></article><button class="btn ghost" id="resetDay">Effacer la journée</button>
+</section>
+<section class="panel" id="history"><div class="stats"><div class="stat"><div class="num" id="histTotal">0</div><div class="lbl">entrées sur 14 jours</div></div><div class="stat"><div class="num" id="histAvg">0</div><div class="lbl">moyenne par jour</div></div><div class="stat"><div class="num" id="histPrec">0</div><div class="lbl">par précaution</div></div></div><article class="card"><h2>Historique</h2><p class="sub">Fréquence des 14 derniers jours.</p><div class="chart" id="historyChart"></div></article><article class="card"><h2>Sauvegarde des données</h2><p class="sub">Les données restent sur cet appareil. Exporte une copie avant de changer de téléphone.</p><div class="actions"><button class="btn secondary" id="exportBtn">Exporter</button><label class="btn ghost" style="display:grid;place-items:center;cursor:pointer">Restaurer<input type="file" id="importFile" accept="application/json" hidden></label></div></article></section>
+<section class="panel" id="kegel"><article class="card kegel"><h2>Séance guidée</h2><p class="sub">Contracte sans bloquer la respiration.</p><div class="field"><label>Programme</label><div class="seg" id="segKphase"><button data-hold="3" data-reps="10" class="sel">3 secondes</button><button data-hold="5" data-reps="10">5 secondes</button></div></div><div class="kegel-phase" id="kPhase">Prêt ?</div><div class="ring" id="kRing"><span>3</span></div><div class="sub" id="kCount">0 / 10</div><button class="btn" id="kStart">Démarrer la séance</button></article><article class="card"><div class="stat" style="box-shadow:none;border:0"><div class="num" id="kToday">0</div><div class="lbl">série(s) terminée(s) aujourd’hui</div></div></article></section>
+<section class="panel" id="plan"><article class="card"><h2>Programme sur 4 semaines</h2><p class="sub">Coche les actions réalisées aujourd’hui.</p><h3 class="sub">Semaines 1–2</h3><div id="plan12"></div><h3 class="sub" style="margin-top:18px">Semaines 3–4</h3><div id="plan34"></div><h3 class="sub" style="margin-top:18px">Habitudes permanentes</h3><div id="planPerm"></div></article><article class="card"><h2>Quand consulter</h2><p class="note">Consulte rapidement en cas de sang dans les urines, fièvre, douleur importante, impossibilité d’uriner ou aggravation brutale. Demande un avis médical si les symptômes persistent.</p></article></section>
 </main>
-
-<nav class="nav" aria-label="Navigation principale">
-  <button data-tab="carnet" class="active"><span>＋</span>Carnet</button>
-  <button data-tab="historique"><span>▥</span>Historique</button>
-  <button data-tab="kegel"><span>◷</span>Kegel</button>
-  <button data-tab="plan"><span>✓</span>Plan</button>
-</nav>
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
-<script src="app.js" defer></script>
-</body>
-</html>
+<nav class="nav"><button data-tab="carnet" class="active"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Carnet</button><button data-tab="history"><svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>Historique</button><button data-tab="kegel"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Kegel</button><button data-tab="plan"><svg viewBox="0 0 24 24"><path d="M6 12l4 4 8-9"/></svg>Plan</button></nav>
+<div class="toast" id="toast"></div><script src="app.js" defer></script>
+</body></html>
