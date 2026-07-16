@@ -1,1 +1,12 @@
-{"name":"Suivi vésical","short_name":"Suivi","start_url":"./","display":"standalone","background_color":"#eef3f6","theme_color":"#1f5f7a","lang":"fr","description":"Carnet personnel de suivi vésical et exercices de Kegel."}
+{
+  "name":"Suivi vésical",
+  "short_name":"Suivi",
+  "start_url":"./",
+  "scope":"./",
+  "display":"standalone",
+  "background_color":"#eef3f6",
+  "theme_color":"#1f5f7a",
+  "lang":"fr",
+  "description":"Carnet personnel de suivi vésical, historique, rappels et exercices de Kegel.",
+  "icons":[{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
