@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1">
+<meta name="theme-color" content="#1f5f7a">
+<title>Suivi vésical</title>
+<style>
+  :root {
+    --ink: #1a2332;
+    --paper: #eef2f5;
+    --card: #ffffff;
+    --line: #d9e0e7;
+    --water: #3a8fb7;
+    --water-deep: #1f5f7a;
+    --warm: #c67b52;
+    --good: #4a8c6f;
+    --alert: #a85454;
+    --muted: #6b7a88;
+    --shadow: 0 1px 3px rgba(31,95,122,.08), 0 6px 20px rgba(31,95,122,.06);
+    --nav-h: 66px;
+    --tap: 50px;
+    --safe-b: env(safe-area-inset-bottom, 0px);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.5;
+    padding-bottom: calc(var(--nav-h) + var(--safe-b) + 12px);
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior-y: contain;
+  }
+
+  header {
+    background: linear-gradient(160deg, var(--water-deep), var(--water));
+    color: #fff;
+    padding: calc(env(safe-area-inset-top,0px) + 20px) 20px 18px;
+    position: relative; overflow: hidden;
+  }
+  header::after {
+    content:""; position:absolute; right:-30px; bottom:-46px;
+    width:150px; height:150px; border-radius:50%; background:rgba(255,255,255,.06);
+  }
+  header h1 { font-size: 1.35rem; font-weight: 650; letter-spacing: -.01em; }
+  header p { font-size: .82rem; opacity: .85; margin-top: 2px; }
+
+  .wrap { max-width: 620px; margin: 0 auto; padding: 18px 14px 0; }
+  .panel { display: none; }
+  .panel.active { display: block; animation: fade .2s ease; }
+  @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  .card {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 16px; padding: 18px 16px; margin-bottom: 14px;
+    box-shadow: var(--shadow);
+  }
+  h2 { font-size: 1.08rem; margin-bottom: 3px; letter-spacing: -.01em; }
+  .sub { font-size: .84rem; color: var(--muted); margin-bottom: 16px; }
+
+  label { display:block; font-size:.74rem; font-weight:700; color:var(--muted);
+          margin-bottom:7px; text-transform:uppercase; letter-spacing:.04em; }
+
+  input, select {
+    width: 100%; min-height: var(--tap); padding: 0 14px; font-size: 16px;
+    border: 1.5px solid var(--line); border-radius: 12px;
+    background: #fafcfd; color: var(--ink); font-family: inherit;
+    appearance: none; -webkit-appearance: none;
+  }
+  select { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236b7a88' stroke-width='3'><path d='M6 9l6 6 6-6'/></svg>");
+           background-repeat: no-repeat; background-position: right 14px center; padding-right: 40px; }
+  input:focus, select:focus { outline: none; border-color: var(--water); background:#fff; }
+
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+  .field { margin-bottom: 16px; }
+  .seg { display: flex; gap: 8px; }
+  .seg button {
+    flex: 1; min-height: var(--tap); font-size: .9rem; font-weight: 650;
+    border: 1.5px solid var(--line); background: #fafcfd; color: var(--muted);
+    border-radius: 12px; cursor: pointer; transition: transform .08s, background .12s, color .12s, border-color .12s;
+  }
+  .seg button:active { transform: scale(.96); }
+  .seg button.sel { background: var(--water); border-color: var(--water); color: #fff; }
+
+  .btn {
+    width: 100%; min-height: 54px; font-size: 1rem; font-weight: 700;
+    background: var(--water-deep); color: #fff; border: none;
+    border-radius: 14px; cursor: pointer;
+    transition: transform .08s, background .15s;
+  }
+  .btn:active { transform: scale(.98); }
+  .btn.ghost { background: transparent; color: var(--muted); border: 1.5px solid var(--line); }
+  .btn.ghost:active { background: #f0f4f7; }
+
+  .stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 14px; }
+  .stat { background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+          padding: 15px 6px; text-align: center; box-shadow: var(--shadow); }
+  .stat .num { font-size: 1.75rem; font-weight: 800; color: var(--water-deep); letter-spacing: -.03em; line-height: 1; }
+  .stat .lbl { font-size: .68rem; color: var(--muted); margin-top: 6px; line-height: 1.25; }
+
+  .entry { display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+  .entry:last-child { border-bottom: none; }
+  .entry .time { font-weight: 800; font-size: 1rem; min-width: 50px; }
+  .entry .meta { flex: 1; font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+  .pill { display:inline-block; font-size:.7rem; font-weight:700; padding:3px 9px; border-radius:20px; }
+  .pill.goutte { background:#fbeee6; color:var(--warm); }
+  .pill.normal { background:#e4f0f5; color:var(--water-deep); }
+  .pill.abondant { background:#e3f1ea; color:var(--good); }
+  .pill.precaution { background:#f5e5e5; color:var(--alert); }
+  .pill.drink { background:#eef1f4; color:var(--muted); }
+  .del { min-width:44px; min-height:44px; background:none; border:none; color:var(--muted);
+         cursor:pointer; font-size:1.1rem; opacity:.55; border-radius:10px; }
+  .del:active { opacity:1; color:var(--alert); background:#faf0f0; }
+  .empty { text-align:center; color:var(--muted); font-size:.9rem; padding:34px 10px; }
+
+  .kegel-timer { text-align: center; padding: 6px 0 4px; }
+  .kegel-phase { font-size: 1.35rem; font-weight: 800; margin: 4px 0; min-height: 1.5em; letter-spacing: .02em; }
+  .kegel-phase.hold { color: var(--water-deep); }
+  .kegel-phase.rest { color: var(--good); }
+  .kegel-count { font-size: .9rem; color: var(--muted); font-weight: 600; }
+  .ring { display:flex; justify-content:center; margin:12px 0; }
+
+  .note { font-size:.82rem; color:var(--muted); background:#f2f6f9; border-radius:12px; padding:12px 14px; margin-top:12px; line-height:1.55; }
+  .note.warn { background:#faf0f0; color:#8a4a4a; }
+
+  .weekhead { font-size:.74rem; font-weight:800; color:var(--water); text-transform:uppercase;
+              letter-spacing:.06em; margin:6px 0 8px; }
+  .task { display:flex; align-items:flex-start; gap:13px; padding:15px 0; border-bottom:1px solid var(--line);
+          cursor:pointer; transition: transform .08s; }
+  .task:active { transform: scale(.99); }
+  .task:last-child { border-bottom:none; }
+  .check { width:26px; height:26px; border:2px solid var(--line); border-radius:9px; flex-shrink:0; margin-top:1px;
+           display:flex; align-items:center; justify-content:center; font-size:.85rem; color:#fff; transition:all .12s; }
+  .task.done .check { background:var(--good); border-color:var(--good); }
+  .task.done .ttext { color:var(--muted); text-decoration:line-through; }
+  .ttext { font-size:.96rem; font-weight:600; }
+  .ttext small { display:block; color:var(--muted); font-size:.8rem; font-weight:400; text-decoration:none; margin-top:3px; line-height:1.45; }
+
+  footer { text-align:center; font-size:.74rem; color:var(--muted); margin:22px 16px 0; line-height:1.6; }
+
+  .nav {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
+    display: flex; background: rgba(255,255,255,.94);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid var(--line);
+    padding-bottom: var(--safe-b);
+    height: calc(var(--nav-h) + var(--safe-b));
+  }
+  .nav button {
+    flex: 1; background: none; border: none; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+    color: var(--muted); font-size: .7rem; font-weight: 700; padding-top: 4px;
+    transition: color .12s;
+  }
+  .nav button svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .nav button.active { color: var(--water-deep); }
+  .nav button.active svg { stroke: var(--water); }
+
+  @media (min-width: 560px) {
+    .wrap { padding-top: 22px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Suivi vésical</h1>
+  <p>Carnet, entraînement et Kegel — sur 4 semaines</p>
+</header>
+<div class="wrap">
+  <div class="panel active" id="carnet">
+    <div class="stats">
+      <div class="stat"><div class="num" id="stCount">0</div><div class="lbl">mictions<br>aujourd'hui</div></div>
+      <div class="stat"><div class="num" id="stGap">–</div><div class="lbl">écart<br>moyen</div></div>
+      <div class="stat"><div class="num" id="stPrec">0</div><div class="lbl">par<br>précaution</div></div>
+    </div>
+    <div class="card">
+      <h2>Nouvelle entrée</h2>
+      <p class="sub">Note dès que ça t'arrive, c'est ce qui rend le carnet fiable.</p>
+      <div class="row">
+        <div><label>Heure</label><input type="time" id="inTime"></div>
+        <div><label>Boisson</label><select id="inDrink"><option value="">— aucune —</option><option>Eau</option><option>Café</option><option>Thé</option><option>Soda / gazeux</option><option>Alcool</option><option>Énergisante</option><option>Jus / agrumes</option><option>Autre</option></select></div>
+      </div>
+      <div class="field"><label>Volume</label><div class="seg" id="segVol"><button data-v="goutte">Goutte</button><button data-v="normal" class="sel">Normal</button><button data-v="abondant">Abondant</button></div></div>
+      <div class="field"><label>Type d'envie</label><div class="seg" id="segType"><button data-t="vraie" class="sel">Vraie envie</button><button data-t="precaution">Par précaution</button></div></div>
+      <button class="btn" id="addBtn">Ajouter l'entrée</button>
+    </div>
+    <div class="card"><h2>Aujourd'hui</h2><p class="sub" id="todayDate"></p><div id="list"></div></div>
+    <button class="btn ghost" id="resetDay">Effacer la journée</button>
+  </div>
+  <div class="panel" id="kegel">
+    <div class="card">
+      <h2>Séance guidée</h2><p class="sub">Contracte les muscles qui coupent le jet. Suis le rythme.</p>
+      <div class="field"><label>Phase du programme</label><div class="seg" id="segKphase"><button data-hold="3" data-reps="10" class="sel">Apprentissage · 3s</button><button data-hold="5" data-reps="10">Renforcement · 5s</button></div></div>
+      <div class="kegel-timer"><div class="kegel-phase" id="kPhase">Prêt ?</div><div class="ring"><svg width="140" height="140" viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" fill="none" stroke="#e4eaef" stroke-width="9"/><circle id="kRing" cx="60" cy="60" r="52" fill="none" stroke="#3a8fb7" stroke-width="9" stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="326.7" transform="rotate(-90 60 60)"/></svg></div><div class="kegel-count" id="kCount">Répétition 0 / 10</div></div>
+      <button class="btn" id="kStart">Démarrer la séance</button>
+      <p class="note">Objectif : 2 séries/jour en apprentissage, 3 séries/jour en renforcement. Effet net vers 4-6 semaines de régularité.</p>
+    </div>
+    <div class="card"><h2>Séries faites aujourd'hui</h2><div class="stat" style="box-shadow:none;border:none;padding:6px 0"><div class="num" id="kToday">0</div><div class="lbl">série(s) complétée(s)</div></div></div>
+  </div>
+  <div class="panel" id="plan">
+    <div class="card"><h2>Programme sur 4 semaines</h2><p class="sub">Coche au fur et à mesure. C'est la régularité qui paie.</p><div class="weekhead">Semaine 1-2 · observer</div><div id="plan12"></div><div class="weekhead" style="margin-top:20px">Semaine 3-4 · rééduquer</div><div id="plan34"></div><div class="weekhead" style="margin-top:20px">Tous les jours · permanent</div><div id="planPerm"></div></div>
+    <div class="card"><h2>Quand consulter</h2><p class="sub">Pas d'urgence sans ces signes, mais une analyse d'urine reste utile.</p><div class="note warn">Consulte si : aucune amélioration après un mois · gêne importante (nuits coupées, gêne au travail) · ou apparition de douleur en urinant, sang, ou fièvre.</div></div>
+  </div>
+  <footer>Outil de suivi personnel, pas un dispositif médical.<br>Les données restent sur ton appareil. Ne remplace pas un avis médical.</footer>
+</div>
+<nav class="nav">
+  <button data-tab="carnet" class="active"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h10"/></svg>Carnet</button>
+  <button data-tab="kegel"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Kegel</button>
+  <button data-tab="plan"><svg viewBox="0 0 24 24"><path d="M9 11l2 2 4-4"/><rect x="4" y="4" width="16" height="16" rx="3"/></svg>Plan</button>
+</nav>
+<script>
+  const todayKey = () => new Date().toISOString().slice(0,10);
+  const load = (k, def) => { try { return JSON.parse(localStorage.getItem(k)) ?? def; } catch { return def; } };
+  const save = (k, v) => localStorage.setItem(k, JSON.stringify(v));
+  const buzz = () => { if (navigator.vibrate) navigator.vibrate(10); };
+  document.querySelectorAll('.nav button').forEach(b => b.onclick = () => { buzz(); document.querySelectorAll('.nav button').forEach(x => x.classList.remove('active')); document.querySelectorAll('.panel').forEach(x => x.classList.remove('active')); b.classList.add('active'); document.getElementById(b.dataset.tab).classList.add('active'); window.scrollTo({top:0, behavior:'instant'}); });
+  function segSetup(id, attr, cb) { const seg = document.getElementById(id); seg.querySelectorAll('button').forEach(b => b.onclick = () => { buzz(); seg.querySelectorAll('button').forEach(x => x.classList.remove('sel')); b.classList.add('sel'); if (cb) cb(b); }); return () => seg.querySelector('.sel')?.dataset[attr]; }
+  const getVol = segSetup('segVol', 'v'); const getType = segSetup('segType', 't');
+  const entriesKey = () => 'void_' + todayKey();
+  function renderCarnet() { const list = document.getElementById('list'); const data = load(entriesKey(), []).sort((a,b) => a.time.localeCompare(b.time)); document.getElementById('todayDate').textContent = new Date().toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'}); if (!data.length) { list.innerHTML = '<div class="empty">Aucune entrée pour l\'instant.</div>'; } else { list.innerHTML = data.map((e,i) => `<div class="entry"><span class="time">${e.time}</span><span class="meta"><span class="pill ${e.vol}">${e.vol}</span>${e.type==='precaution' ? '<span class="pill precaution">précaution</span>' : ''}${e.drink ? '<span class="pill drink">'+e.drink+'</span>' : ''}</span><button class="del" data-i="${i}">✕</button></div>`).join(''); list.querySelectorAll('.del').forEach(b => b.onclick = () => { buzz(); const arr = load(entriesKey(), []).sort((a,b)=>a.time.localeCompare(b.time)); arr.splice(+b.dataset.i, 1); save(entriesKey(), arr); renderCarnet(); }); }
+    document.getElementById('stCount').textContent = data.length; document.getElementById('stPrec').textContent = data.filter(e=>e.type==='precaution').length; if (data.length >= 2) { let gaps = []; for (let i=1;i<data.length;i++) { const [h1,m1]=data[i-1].time.split(':').map(Number); const [h2,m2]=data[i].time.split(':').map(Number); gaps.push((h2*60+m2)-(h1*60+m1)); } const avg = gaps.reduce((a,b)=>a+b,0)/gaps.length; document.getElementById('stGap').textContent = Math.floor(avg/60)+'h'+String(Math.round(avg%60)).padStart(2,'0'); } else document.getElementById('stGap').textContent = '–'; }
+  function nowHM(){ const d=new Date(); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+  document.getElementById('inTime').value = nowHM();
+  document.getElementById('addBtn').onclick = () => { buzz(); const time = document.getElementById('inTime').value || nowHM(); const arr = load(entriesKey(), []); arr.push({ time, vol:getVol(), type:getType(), drink:document.getElementById('inDrink').value }); save(entriesKey(), arr); document.getElementById('inTime').value = nowHM(); document.getElementById('inDrink').value = ''; renderCarnet(); };
+  document.getElementById('resetDay').onclick = () => { if (confirm('Effacer toutes les entrées d\'aujourd\'hui ?')) { localStorage.removeItem(entriesKey()); renderCarnet(); } };
+  let kHold = 3, kReps = 10; segSetup('segKphase', 'hold', b => { kHold = +b.dataset.hold; kReps = +b.dataset.reps; document.getElementById('kCount').textContent = 'Répétition 0 / '+kReps; }); const kSeriesKey = () => 'kegel_' + todayKey(); document.getElementById('kToday').textContent = load(kSeriesKey(), 0); let running = false; document.getElementById('kStart').onclick = () => { if (!running) runKegel(); };
+  function runKegel() { running = true; buzz(); const phaseEl = document.getElementById('kPhase'); const countEl = document.getElementById('kCount'); const ring = document.getElementById('kRing'); const btn = document.getElementById('kStart'); const CIRC = 326.7; btn.textContent = 'Séance en cours…'; btn.style.opacity = .6; let rep = 0; function step() { if (rep >= kReps) return finish(); rep++; countEl.textContent = `Répétition ${rep} / ${kReps}`; buzz(); phaseEl.textContent = 'CONTRACTE'; phaseEl.className = 'kegel-phase hold'; ring.style.transition = 'none'; ring.style.strokeDashoffset = CIRC; void ring.getBoundingClientRect(); ring.style.transition = `stroke-dashoffset ${kHold}s linear`; ring.style.stroke = '#1f5f7a'; ring.style.strokeDashoffset = 0; let n = kHold; const t1 = setInterval(()=>{ n--; phaseEl.textContent = 'CONTRACTE · '+n; if(n<=0) clearInterval(t1); }, 1000); setTimeout(() => { buzz(); phaseEl.textContent = 'RELÂCHE'; phaseEl.className = 'kegel-phase rest'; ring.style.transition='none'; ring.style.strokeDashoffset = 0; void ring.getBoundingClientRect(); ring.style.transition = `stroke-dashoffset ${kHold}s linear`; ring.style.stroke = '#4a8c6f'; ring.style.strokeDashoffset = CIRC; let m = kHold; const t2 = setInterval(()=>{ m--; phaseEl.textContent = 'RELÂCHE · '+m; if(m<=0) clearInterval(t2); }, 1000); setTimeout(step, kHold*1000); }, kHold*1000); } function finish() { running = false; buzz(); phaseEl.textContent = 'Série terminée ✓'; phaseEl.className = 'kegel-phase rest'; countEl.textContent = `Répétition ${kReps} / ${kReps}`; ring.style.strokeDashoffset = CIRC; btn.textContent = 'Démarrer la séance'; btn.style.opacity = 1; const done = load(kSeriesKey(), 0) + 1; save(kSeriesKey(), done); document.getElementById('kToday').textContent = done; } step(); }
+  const planItems = { plan12: [['carnet', 'Tenir le carnet', 'Chaque passage : heure, volume, boisson'],['irritants', 'Réduire café / thé', 'Le principal suspect. Réduis et observe.'],['kegel-appr', 'Kegel apprentissage', '3s / 3s · 10 fois · 2 séries/jour · viser la précision']], plan34: [['delai', 'Retarder les mictions', 'Envie → attendre 5 min, puis allonger chaque semaine'],['stop-prec', 'Stop au « par précaution »', 'Y aller sur vraie envie uniquement'],['kegel-renf', 'Kegel renforcement', '5s / 5s · 10 fois · 3 séries/jour']], planPerm: [['hydra', 'Hydratation canicule', 'Urines claires = bon repère · réduire 2-3h avant le coucher'],['stress', 'Relâcher la crispation', 'Stress et tension abdominale augmentent l\'urgence']] };
+  function renderPlan() { const done = load('plan_'+todayKey(), {}); for (const [box, items] of Object.entries(planItems)) { document.getElementById(box).innerHTML = items.map(([id,t,s]) => `<div class="task ${done[id]?'done':''}" data-id="${id}"><div class="check">${done[id]?'✓':''}</div><div class="ttext">${t}<small>${s}</small></div></div>`).join(''); } document.querySelectorAll('.task').forEach(el => el.onclick = () => { buzz(); const d = load('plan_'+todayKey(), {}); d[el.dataset.id] = !d[el.dataset.id]; save('plan_'+todayKey(), d); renderPlan(); }); }
+  renderCarnet(); renderPlan();
+</script>
+</body>
+</html>
