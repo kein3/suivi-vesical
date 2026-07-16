@@ -1,53 +1,86 @@
-/* Correctifs visuels mobiles — v7 */
-:root{--mobile-nav-h:64px}
-html,body{overflow-x:clip}
-body{padding-bottom:calc(var(--mobile-nav-h) + env(safe-area-inset-bottom,0px) + 28px)}
-.wrap{padding-bottom:92px}
+/* Correctifs visuels mobiles — v8 */
+:root{--mobile-nav-h:58px}
+html,body{max-width:100%;overflow-x:hidden}
+body{padding-bottom:calc(var(--mobile-nav-h) + env(safe-area-inset-bottom,0px) + 24px)}
+.wrap{padding-bottom:calc(var(--mobile-nav-h) + env(safe-area-inset-bottom,0px) + 46px)}
 .panel{scroll-margin-bottom:110px}
 
-/* Espacements plus respirants */
+/* Empêche les contrôles natifs iOS de dépasser leur colonne */
+.row>div,.field,.date-nav{width:100%;max-width:100%;min-width:0;overflow:hidden}
+input[type="time"],input[type="date"]{
+  display:block!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  box-sizing:border-box!important;
+  -webkit-appearance:none;
+  appearance:none;
+  overflow:hidden;
+  text-align:left;
+}
+input[type="time"]::-webkit-date-and-time-value,
+input[type="date"]::-webkit-date-and-time-value{
+  display:block;
+  width:100%;
+  min-width:0;
+  margin:0;
+  padding:0;
+  text-align:left;
+}
+input[type="time"]::-webkit-datetime-edit,
+input[type="date"]::-webkit-datetime-edit{
+  display:block;
+  width:100%;
+  min-width:0;
+  padding:0;
+}
+
+/* Espacements */
 .card{overflow:hidden}
 .card>*:last-child{margin-bottom:0}
 .card-head{margin-bottom:18px}
 .row{row-gap:18px}
-.row+ .row{margin-top:2px}
+.row+.row{margin-top:2px}
 .field{margin-bottom:18px}
 label{margin-bottom:8px}
 input,select,textarea{min-height:47px}
 .seg{margin-top:2px}
 .note{margin-top:14px}
 
-/* Navigation plus compacte et moins intrusive */
+/* Barre inférieure compacte et collée au bord, sans recouvrir autant le contenu */
 .nav{
-  left:10px;
-  right:10px;
-  bottom:calc(8px + env(safe-area-inset-bottom,0px));
-  height:var(--mobile-nav-h);
-  padding:5px;
-  border-radius:19px;
+  left:0!important;
+  right:0!important;
+  bottom:0!important;
+  width:100%!important;
+  max-width:none!important;
+  height:calc(var(--mobile-nav-h) + env(safe-area-inset-bottom,0px))!important;
+  margin:0!important;
+  padding:5px 6px env(safe-area-inset-bottom,0px)!important;
+  border-left:0!important;
+  border-right:0!important;
+  border-bottom:0!important;
+  border-radius:18px 18px 0 0!important;
   transition:transform .2s ease,opacity .2s ease;
 }
-.nav button{border-radius:14px;padding:3px 1px;font-size:.52rem;gap:1px}
+.nav button{border-radius:13px;padding:3px 1px;font-size:.52rem;gap:1px}
 .nav button>span:first-child{font-size:1rem}
 .nav button.active{box-shadow:inset 0 0 0 1px rgba(8,119,138,.08)}
 body:has(input:focus) .nav,
 body:has(select:focus) .nav,
-body:has(textarea:focus) .nav{transform:translateY(calc(100% + 24px));opacity:0;pointer-events:none}
+body:has(textarea:focus) .nav{transform:translateY(110%);opacity:0;pointer-events:none}
 
-/* Formulaire : éviter l'effet collé */
+/* Formulaire */
 #carnet .card:first-of-type{padding-bottom:22px}
 #carnet .card:first-of-type .row>div{display:flex;flex-direction:column}
-#carnet .card:first-of-type .row>div+div{margin-top:1px}
 #carnet .card:first-of-type .field{padding-top:2px}
 #carnet .card:first-of-type .btn{margin-top:4px}
 
-/* Statistiques et listes */
 .stats{align-items:stretch}
 .stat{min-height:104px}
 .entry{padding-top:14px;padding-bottom:14px}
 .entry-actions{align-self:start}
 
-/* Petits écrans iPhone */
 @media(max-width:600px){
   .app-header{padding-bottom:24px}
   .wrap{padding-top:16px;padding-left:12px;padding-right:12px}
@@ -76,7 +109,6 @@ body:has(textarea:focus) .nav{transform:translateY(calc(100% + 24px));opacity:0;
   .stat strong{font-size:1.32rem}
   .stat span{font-size:.56rem}
   .card{border-radius:18px;padding-left:13px;padding-right:13px}
-  .nav{left:6px;right:6px;bottom:calc(6px + env(safe-area-inset-bottom,0px));height:60px}
   .nav button{font-size:.48rem}
   .nav button>span:first-child{font-size:.96rem}
   .insight{grid-template-columns:70px minmax(0,1fr) auto}
