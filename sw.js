@@ -1,5 +1,5 @@
-const CACHE='suivi-v9-polish-20260716';
-const FILES=['./','./index.html','./style.css?v=4','./mobile-fix.css?v=9','./app.js?v=4','./data.js','./tracker.js','./insights.js','./settings.js','./manifest.webmanifest','./icon.svg'];
+const CACHE='suivi-v10-notifications-20260716';
+const FILES=['./','./index.html','./style.css?v=4','./mobile-fix.css?v=9','./app.js?v=4','./settings.js?v=10','./data.js','./tracker.js','./insights.js','./manifest.webmanifest','./icon.svg'];
 
 self.addEventListener('install',event=>{
   self.skipWaiting();
@@ -35,5 +35,21 @@ self.addEventListener('fetch',event=>{
     }catch{
       return (await caches.match(event.request))||(event.request.mode==='navigate'?await caches.match('./index.html'):Response.error());
     }
+  })());
+});
+
+self.addEventListener('notificationclick',event=>{
+  event.notification.close();
+  const target=new URL(event.notification.data?.url||'./',self.location.origin).href;
+  event.waitUntil((async()=>{
+    const windows=await self.clients.matchAll({type:'window',includeUncontrolled:true});
+    for(const client of windows){
+      if('focus'in client){
+        await client.focus();
+        if('navigate'in client)await client.navigate(target);
+        return;
+      }
+    }
+    if(self.clients.openWindow)await self.clients.openWindow(target);
   })());
 });
