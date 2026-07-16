@@ -1,4 +1,4 @@
-const CACHE='suivi-v4-20260716b';
+const CACHE='suivi-v5-visual-20260716';
 const FILES=['./','./index.html','./style.css?v=4','./app.js?v=4','./data.js','./tracker.js','./insights.js','./settings.js','./manifest.webmanifest','./icon.svg'];
 self.addEventListener('install',event=>{self.skipWaiting();event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES)))});
 self.addEventListener('activate',event=>{event.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))),self.clients.claim()]))});
