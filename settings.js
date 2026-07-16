@@ -5,5 +5,337 @@ const SETTINGS='sv_settings';
 let reminderTimers=[];
 let lastActivity=Date.now();
 let lockTimer;
-const defaults={reminderMorning:'08:30',reminderEvening:'19:30',hydrationStart:'09:00',hydrationInterval:90,remindersEnabled:false,autoLockMinutes:5};
-const settings=()=>({...defaults,...load(SET
+
+const defaults={
+  reminderMorning:'08:30',
+  reminderEvening:'19:30',
+  hydrationStart:'09:00',
+  hydrationInterval:90,
+  remindersEnabled:false,
+  autoLockMinutes:5
+};
+
+const settings=()=>({...defaults,...load(SETTINGS,{})});
+
+function persistSettings(){
+  const next={
+    ...settings(),
+    reminderMorning:$('#reminderMorning').value,
+    reminderEvening:$('#reminderEvening').value,
+    hydrationStart:$('#hydrationStart').value,
+    hydrationInterval:+$('#hydrationInterval').value,
+    remindersEnabled:$('#remindersEnabled').checked,
+    autoLockMinutes:+$('#autoLockMinutes').value
+  };
+  save(SETTINGS,next);
+  scheduleReminders();
+  scheduleAutoLock();
+  renderNotificationButton();
+}
+
+function secondsUntil(time){
+  const [h,m]=time.split(':').map(Number);
+  const now=new Date();
+  const target=new Date();
+  target.setHours(h,m,0,0);
+  if(target<=now)target.setDate(target.getDate()+1);
+  return(target-now)/1000;
+}
+
+function scheduleDaily(time,title,body){
+  const run=()=>{
+    showReminder(title,body);
+    const id=setTimeout(run,24*3600*1000);
+    reminderTimers.push(id);
+  };
+  const id=setTimeout(run,secondsUntil(time)*1000);
+  reminderTimers.push(id);
+}
+
+function scheduleHydration(start,interval){
+  if(!interval)return;
+  const [h,m]=start.split(':').map(Number);
+  const now=new Date();
+  const first=new Date();
+  first.setHours(h,m,0,0);
+  while(first<=now)first.setMinutes(first.getMinutes()+interval);
+  const run=()=>{
+    const hour=new Date().getHours();
+    if(hour<21)showReminder('Hydratation','Pense à boire régulièrement, sans excès.');
+    const id=setTimeout(run,interval*60000);
+    reminderTimers.push(id);
+  };
+  const id=setTimeout(run,first-now);
+  reminderTimers.push(id);
+}
+
+function scheduleReminders(){
+  reminderTimers.forEach(clearTimeout);
+  reminderTimers=[];
+  const s=settings();
+  if(!s.remindersEnabled)return;
+  scheduleDaily(s.reminderMorning,'Séance de Kegel','Ta séance du matin est prête.');
+  scheduleDaily(s.reminderEvening,'Séance de Kegel','Pense à ta séance du soir.');
+  scheduleHydration(s.hydrationStart,s.hydrationInterval);
+}
+
+async function showSystemNotification(title,body){
+  if(!('Notification'in window)||Notification.permission!=='granted')return false;
+  try{
+    if('serviceWorker'in navigator){
+      const registration=await navigator.serviceWorker.ready;
+      await registration.showNotification(title,{
+        body,
+        icon:'./icon.svg',
+        badge:'./icon.svg',
+        tag:`suivi-vesical-${title.toLowerCase().replace(/\s+/g,'-')}`,
+        renotify:true,
+        data:{url:'./'}
+      });
+    }else{
+      new Notification(title,{body,icon:'./icon.svg'});
+    }
+    return true;
+  }catch{
+    try{
+      new Notification(title,{body,icon:'./icon.svg'});
+      return true;
+    }catch{
+      return false;
+    }
+  }
+}
+
+async function showReminder(title,body){
+  if(document.visibilityState==='visible')toast(`${title} · ${body}`);
+  await showSystemNotification(title,body);
+}
+
+function renderNotificationButton(){
+  const btn=$('#notificationBtn');
+  if(!btn)return;
+  if(!('Notification'in window)){
+    btn.textContent='Notifications indisponibles';
+    btn.disabled=true;
+    return;
+  }
+  btn.disabled=false;
+  btn.textContent=Notification.permission==='granted'?'Tester la notification':'Autoriser et tester';
+}
+
+async function requestAndTestNotification(){
+  if(!('Notification'in window)){
+    toast('Notifications non prises en charge sur cet appareil');
+    return;
+  }
+  let permission=Notification.permission;
+  if(permission!=='granted')permission=await Notification.requestPermission();
+  if(permission!=='granted'){
+    renderNotificationButton();
+    toast(permission==='denied'?'Notifications refusées dans les réglages iPhone':'Autorisation non accordée');
+    return;
+  }
+  const current=settings();
+  save(SETTINGS,{...current,remindersEnabled:true});
+  $('#remindersEnabled').checked=true;
+  scheduleReminders();
+  renderNotificationButton();
+  const sent=await showSystemNotification('Test Suivi vésical','Les notifications sont bien autorisées sur cet appareil.');
+  toast(sent?'Notification test envoyée':'Échec du test de notification');
+}
+
+function icsStamp(hm){
+  const d=new Date();
+  d.setDate(d.getDate()+1);
+  const [h,m]=hm.split(':').map(Number);
+  d.setHours(h,m,0,0);
+  return`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}T${String(h).padStart(2,'0')}${String(m).padStart(2,'0')}00`;
+}
+
+function calendarFile(){
+  const s=settings();
+  const events=[
+    ['Kegel matin',s.reminderMorning,'Séance guidée de Kegel'],
+    ['Kegel soir',s.reminderEvening,'Séance guidée de Kegel']
+  ];
+  if(s.hydrationInterval)events.push(['Hydratation',s.hydrationStart,'Rappel de boire régulièrement']);
+  const body=[
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Suivi vesical//FR',
+    ...events.flatMap(([title,time,desc],i)=>[
+      'BEGIN:VEVENT',
+      `UID:suivi-vesical-${i}@kein3.github.io`,
+      `DTSTART;TZID=Europe/Paris:${icsStamp(time)}`,
+      'RRULE:FREQ=DAILY',
+      'DURATION:PT5M',
+      `SUMMARY:${title}`,
+      `DESCRIPTION:${desc}`,
+      'BEGIN:VALARM',
+      'TRIGGER:-PT5M',
+      'ACTION:DISPLAY',
+      `DESCRIPTION:${title}`,
+      'END:VALARM',
+      'END:VEVENT'
+    ]),
+    'END:VCALENDAR'
+  ].join('\r\n');
+  downloadFile('rappels-suivi-vesical.ics',body,'text/calendar;charset=utf-8');
+}
+
+async function setPin(){
+  const pin=$('#newPin').value;
+  const confirmPin=$('#confirmPin').value;
+  if(!/^\d{4,8}$/.test(pin)){
+    toast('Le PIN doit contenir 4 à 8 chiffres');
+    return;
+  }
+  if(pin!==confirmPin){
+    toast('Les deux codes ne correspondent pas');
+    return;
+  }
+  const salt=crypto.getRandomValues(new Uint8Array(16));
+  const saltText=toBase64Url(salt);
+  const hash=await hashPin(pin,saltText);
+  save('sv_pin',{salt:saltText,hash});
+  $('#newPin').value='';
+  $('#confirmPin').value='';
+  renderSecurity();
+  toast('Verrouillage activé');
+}
+
+async function verifyPin(pin){
+  const record=load('sv_pin',null);
+  return Boolean(record&&await hashPin(pin,record.salt)===record.hash);
+}
+
+export function isLockEnabled(){
+  return Boolean(load('sv_pin',null));
+}
+
+export function lockApp(){
+  if(!isLockEnabled())return;
+  $('#lockScreen').classList.remove('hidden');
+  $('#lockScreen').setAttribute('aria-hidden','false');
+  $('#unlockPin').value='';
+  setTimeout(()=>$('#unlockPin').focus(),100);
+}
+
+function unlockApp(){
+  lastActivity=Date.now();
+  $('#lockScreen').classList.add('hidden');
+  $('#lockScreen').setAttribute('aria-hidden','true');
+  scheduleAutoLock();
+}
+
+async function registerBiometric(){
+  if(!window.PublicKeyCredential){
+    toast('Face ID non pris en charge ici');
+    return;
+  }
+  try{
+    const challenge=crypto.getRandomValues(new Uint8Array(32));
+    const userId=crypto.getRandomValues(new Uint8Array(16));
+    const credential=await navigator.credentials.create({publicKey:{
+      challenge,
+      rp:{name:'Suivi vésical'},
+      user:{id:userId,name:'utilisateur-local',displayName:'Utilisateur local'},
+      pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],
+      authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required',residentKey:'preferred'},
+      timeout:60000,
+      attestation:'none'
+    }});
+    save('sv_biometric',{id:toBase64Url(credential.rawId)});
+    renderSecurity();
+    toast('Face ID / appareil activé');
+  }catch{
+    toast('Activation annulée ou indisponible');
+  }
+}
+
+async function biometricUnlock(){
+  const bio=load('sv_biometric',null);
+  if(!bio)return;
+  try{
+    await navigator.credentials.get({publicKey:{
+      challenge:crypto.getRandomValues(new Uint8Array(32)),
+      allowCredentials:[{type:'public-key',id:fromBase64Url(bio.id)}],
+      userVerification:'required',
+      timeout:60000
+    }});
+    unlockApp();
+  }catch{
+    toast('Déverrouillage non validé');
+  }
+}
+
+function renderSecurity(){
+  const active=isLockEnabled();
+  const bio=load('sv_biometric',null);
+  $('#pinSetupBlock').classList.toggle('hidden',active);
+  $('#pinActiveBlock').classList.toggle('hidden',!active);
+  $('#quickLockBtn').classList.toggle('hidden',!active);
+  $('#biometricUnlockBtn').classList.toggle('hidden',!bio);
+  $('#biometricSetupBtn').textContent=bio?'Face ID / appareil activé':'Activer Face ID / appareil';
+}
+
+function scheduleAutoLock(){
+  clearTimeout(lockTimer);
+  const mins=settings().autoLockMinutes;
+  if(!isLockEnabled()||!mins)return;
+  lockTimer=setTimeout(()=>{
+    if(Date.now()-lastActivity>=mins*60000)lockApp();
+    else scheduleAutoLock();
+  },mins*60000);
+}
+
+function activity(){
+  lastActivity=Date.now();
+  if(isLockEnabled())scheduleAutoLock();
+}
+
+export function initSettings(){
+  const s=settings();
+  $('#reminderMorning').value=s.reminderMorning;
+  $('#reminderEvening').value=s.reminderEvening;
+  $('#hydrationStart').value=s.hydrationStart;
+  $('#hydrationInterval').value=String(s.hydrationInterval);
+  $('#remindersEnabled').checked=s.remindersEnabled;
+  $('#autoLockMinutes').value=String(s.autoLockMinutes);
+
+  ['reminderMorning','reminderEvening','hydrationStart','hydrationInterval','remindersEnabled','autoLockMinutes']
+    .forEach(id=>$('#'+id).onchange=persistSettings);
+
+  $('#notificationBtn').onclick=requestAndTestNotification;
+  $('#calendarReminderBtn').onclick=calendarFile;
+  $('#setPinBtn').onclick=setPin;
+  $('#removePinBtn').onclick=()=>{
+    if(confirm('Désactiver le verrouillage local ?')){
+      localStorage.removeItem('sv_pin');
+      localStorage.removeItem('sv_biometric');
+      renderSecurity();
+      toast('Verrouillage désactivé');
+    }
+  };
+  $('#biometricSetupBtn').onclick=registerBiometric;
+  $('#quickLockBtn').onclick=lockApp;
+  $('#unlockBtn').onclick=async()=>{
+    if(await verifyPin($('#unlockPin').value))unlockApp();
+    else toast('Code incorrect');
+  };
+  $('#unlockPin').onkeydown=e=>{
+    if(e.key==='Enter')$('#unlockBtn').click();
+  };
+  $('#biometricUnlockBtn').onclick=biometricUnlock;
+
+  ['pointerdown','keydown','touchstart'].forEach(evt=>document.addEventListener(evt,activity,{passive:true}));
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='visible')scheduleReminders();
+  });
+
+  renderNotificationButton();
+  renderSecurity();
+  scheduleReminders();
+  scheduleAutoLock();
+  if(isLockEnabled())lockApp();
+}
